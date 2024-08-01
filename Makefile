@@ -56,7 +56,11 @@ dep-get:
 ROOT_PATH := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
 
 .PHONY: all
-all: ${OUT_PATH}/microkit-sdk-1.2.6
+all: dep-all ${OUT_PATH}/microkit-sdk-1.2.6
+
+.PHONY: dep-all
+dep-all:
+	make -C ${DEP_SL4_PATH} all
 
 ${TMP_PATH}:
 	mkdir ${TMP_PATH}
