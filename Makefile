@@ -5,15 +5,17 @@
 #===========================================================
 # Check
 #===========================================================
-EXP_INFO := sel4devkit-maaxboard-microkit-docker-dev-env 1 *
-CHK_PATH_FILE := /check.mk
-ifeq ($(wildcard ${CHK_PATH_FILE}),)
-    HALT := TRUE
-else
-    include ${CHK_PATH_FILE}
-endif
-ifdef HALT
-    $(error Expected Environment Not Found: ${EXP_INFO})
+ifndef FORCE
+    EXP_INFO := sel4devkit-maaxboard-microkit-docker-dev-env 1 *
+    CHK_PATH_FILE := /check.mk
+    ifeq ($(wildcard ${CHK_PATH_FILE}),)
+        HALT := TRUE
+    else
+        include ${CHK_PATH_FILE}
+    endif
+    ifdef HALT
+        $(error Expected Environment Not Found: ${EXP_INFO})
+    endif
 endif
 
 #===========================================================
@@ -30,9 +32,10 @@ DEP_SL4_PATH := ${DEP_PATH}/sel4
 #===========================================================
 .PHONY: usage
 usage: 
-	@echo "usage: make <target> [COMPLETE=TRUE]"
+	@echo "usage: make <target> [FORCE=TRUE] [COMPLETE=TRUE]"
 	@echo ""
 	@echo "<target> is one off:"
+	@echo "get"
 	@echo "all"
 	@echo "clean"
 	@echo "reset"
@@ -40,6 +43,14 @@ usage:
 #===========================================================
 # Target
 #===========================================================
+.PHONY: get
+get: dep-get | ${TMP_PATH}
+	git -C ${TMP_PATH} clone --branch "dev" "git@github.com:Ivan-Velickovic/microkit.git" microkit
+	git -C ${TMP_PATH}/microkit reset --hard "7c679ea2df3603f81e4afdb36676bbaea0f265c8"
+
+.PHONY: dep-get
+dep-get:
+	make -C ${DEP_SL4_PATH} get
 
 # Prefer relative. Only use where absolutely essential.
 ROOT_PATH := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
@@ -66,10 +77,7 @@ ${OUT_PATH}/microkit-sdk-1.2.6:
 	make all COMPLETE=TRUE
 endif
 
-${TMP_PATH}/microkit/release/microkit-sdk-1.2.6: ${DEP_SL4_PATH}/out/sel4 | ${TMP_PATH}
-	# Acquire.
-	git -C ${TMP_PATH} clone --branch "dev" "git@github.com:Ivan-Velickovic/microkit.git" microkit
-	git -C ${TMP_PATH}/microkit reset --hard "7c679ea2df3603f81e4afdb36676bbaea0f265c8"
+${TMP_PATH}/microkit/release/microkit-sdk-1.2.6: ${DEP_SL4_PATH}/out/sel4 ${TMP_PATH}/microkit | ${TMP_PATH}
 	# Adjust to use GCC 12.
 	sed --in-place --expression "s/aarch64-none-elf/aarch64-linux-gnu/g" ${TMP_PATH}/microkit/build_sdk.py ${TMP_PATH}/microkit/example/maaxboard/hello/Makefile ${TMP_PATH}/microkit/monitor/Makefile ${TMP_PATH}/microkit/loader/Makefile ${TMP_PATH}/microkit/libmicrokit/Makefile
 	sed --in-place --expression "s/ -g3 /     /g" ${TMP_PATH}/microkit/example/maaxboard/hello/Makefile ${TMP_PATH}/microkit/monitor/Makefile ${TMP_PATH}/microkit/loader/Makefile ${TMP_PATH}/microkit/libmicrokit/Makefile
