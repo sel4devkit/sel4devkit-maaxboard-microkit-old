@@ -32,7 +32,7 @@ DEP_SL4_PATH := ${DEP_PATH}/sel4
 #===========================================================
 .PHONY: usage
 usage: 
-	@echo "usage: make <target> [FORCE=TRUE] [COMPLETE=TRUE]"
+	@echo "usage: make <target> [FORCE=TRUE]"
 	@echo ""
 	@echo "<target> is one off:"
 	@echo "get"
@@ -43,6 +43,16 @@ usage:
 #===========================================================
 # Target
 #===========================================================
+ifneq ($(wildcard ${OUT_PATH}/microkit-sdk-1.2.6),)
+
+.PHONY: get
+get:
+
+.PHONY: all
+all:
+
+else
+
 .PHONY: get
 get: dep-get | ${TMP_PATH}
 	git -C ${TMP_PATH} clone --branch "dev" "git@github.com:Ivan-Velickovic/microkit.git" microkit
@@ -71,15 +81,8 @@ ${OUT_PATH}:
 ${DEP_SL4_PATH}/out/sel4:
 	make -C ${DEP_SL4_PATH} all
 
-ifdef COMPLETE
-# Cache with dependencies.
 ${OUT_PATH}/microkit-sdk-1.2.6: ${TMP_PATH}/microkit/release/microkit-sdk-1.2.6 | ${OUT_PATH}
 	cp -r $< $@
-else
-# Cache without dependencies.
-${OUT_PATH}/microkit-sdk-1.2.6:
-	make all COMPLETE=TRUE
-endif
 
 ${TMP_PATH}/microkit/release/microkit-sdk-1.2.6: ${DEP_SL4_PATH}/out/sel4 ${TMP_PATH}/microkit | ${TMP_PATH}
 	# Adjust to use GCC 12.
@@ -93,6 +96,8 @@ ${TMP_PATH}/microkit/release/microkit-sdk-1.2.6: ${DEP_SL4_PATH}/out/sel4 ${TMP_
 	# Build.
 	. ${TMP_PATH}/pyenv/bin/activate ; cd ${TMP_PATH}/microkit ; python build_sdk.py --sel4=${ROOT_PATH}/${DEP_SL4_PATH}/out/sel4 --filter-boards maaxboard
 	
+endif
+
 .PHONY: clean
 clean:
 	make -C ${DEP_SL4_PATH} clean
