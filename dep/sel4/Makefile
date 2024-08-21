@@ -39,7 +39,9 @@ usage:
 # Target
 #===========================================================
 .PHONY: get
-get: | ${OUT_PATH}
+get: ${OUT_PATH}/sel4
+
+${OUT_PATH}/sel4: | ${OUT_PATH}
 	git -C ${OUT_PATH} clone --branch "microkit" "git@github.com:seL4/seL4.git" sel4
 	git -C ${OUT_PATH}/sel4 reset --hard "0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0"
 
