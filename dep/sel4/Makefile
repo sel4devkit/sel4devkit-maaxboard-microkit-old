@@ -40,8 +40,8 @@ usage:
 #===========================================================
 .PHONY: get
 get: | ${OUT_PATH}
-	git -C ${OUT_PATH} clone --branch "microkit-dev" "git@github.com:Ivan-Velickovic/seL4.git" sel4
-	git -C ${OUT_PATH}/sel4 reset --hard "b12f213930b45dd8563818d4f7c52ff36433b938"
+	git -C ${OUT_PATH} clone --branch "microkit" "git@github.com:seL4/seL4.git" sel4
+	git -C ${OUT_PATH}/sel4 reset --hard "0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0"
 
 .PHONY: all
 all:

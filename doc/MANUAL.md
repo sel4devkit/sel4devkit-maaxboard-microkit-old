@@ -1,13 +1,10 @@
 # Introduction
 
 This Package forms part of the seL4 Developer Kit. It provides a fully
-coordinated build of MaaXBoard Microkit (Development Version). Several other
-Packages associated with the seL4 Developer Kit depend upon this Package in
-achieving a consistent build of the MaaXBoard Microkit.
-
-Note that the MaaXBoard Microkit (Development Version) is knowingly an ongoing
-work in process. It is included here, primarily to satisfy the dependencies of
-libvmm (an experimental virtual machine monitor for the seL4 microkernel).
+coordinated build of MaaXBoard Microkit, at an older version, to satisfy some
+legacy dependicies. Some other Packages associated with the seL4 Developer Kit
+depend upon this Package in achieving a consistent build of this MaaXBoard
+Microkit.
 
 # Usage
 
@@ -58,10 +55,7 @@ git add --force <Path Files>
 ## Dependencies
 
 Seeking a consistent build, both Microkit, and its dependency on seL4, are
-fixed to specific revisions. The intention is to remain aligned with the most
-recent, and sufficiently functional, deployment. It is likely that it will
-become appropriate to revisit these revisions, to benefit from recent
-enhancements.
+fixed to specific revisions.
 
 ## Compiler Toolchain
 
@@ -72,9 +66,25 @@ by Debian. Currently, Microkit does not provide a mechanism to select the
 Compiler Toolchain. As a workaround, Microkit is trivially patched to adopt
 this Compiler Toolchain (aarch64-linux-gnu).
 
-## Avoid Document Build
+## Increased Stack Size
 
-This instance of Microkit does not provide a configuration mechanism to
-deactivate the document build process. Since the document build process has
-various dependencies not necessary for routine development, Microkit is
-trivially patched to remove the document build phase.
+Other Packages associated with the seL4 Developer Kit, which make use of this
+Microkit, require a stack size greater than the Microkit default (4096 bytes).
+This Microkit does not provide a configuration mechanism to control the stack
+size. As a workaround, Microkit is trivially patched at build time to increase
+the stack size (131072 bytes).
+
+Note that the provision of too small stack size can lead to program failures
+in unexpected locations, as the correspondence between logical program
+behaviour and internal higher stack usage is not always obvious. To reduce the
+likelihood of such confusing failures, we choose a stack size Knowingly larger
+than our anticipated needs.
+
+## Consistent Loader Link Address
+
+This Microkit has a default Loader Link Address for MaaXBoard (0x40480000)
+which clashes with memory allocation policies associated with a separate VMM
+facility (Virtual Machine Manager). Microkit does not provide a configuration
+mechanism to control the default Loader Link Address. As a workaround, the
+Microkit is trivially patched at build time to change the Loader Link Address
+(0x50000000).
